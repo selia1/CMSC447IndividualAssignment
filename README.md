@@ -9,12 +9,12 @@ The following libraries (and any they are dependant on) were added to the virtua
 - sqlAlchemy
 
 Files not auto-generated in virtual environment:
-myVenv
-| - > app.py
-| - > create.sql
-| - > drop.sql
-| - > populate.sql
-| - > Templates
-| - - | - > edit.html
-| - - | - > home.html
-| - - | - > view.html
+*myVenv*:
+- app.py
+- create.sql
+- drop.sql
+- populate.sql
+- *Templates*:
+    - edit.html
+    - home.html
+    - view.html

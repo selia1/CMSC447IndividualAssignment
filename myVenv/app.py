@@ -7,6 +7,7 @@
 #-----------------------------------------------------------------------
 
 from flask import Flask, render_template
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -20,6 +21,11 @@ def home():
 
 @app.route('/view')
 def view():
+    df = pd.read_csv("./tmp.csv")
+    html = df.to_html()
+    text_file = open("./Templates/table.html", "w") 
+    text_file.write(html) 
+    text_file.close() 
     return render_template("view.html")
 
 @app.route('/edit')

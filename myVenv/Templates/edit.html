@@ -46,9 +46,29 @@
     
     <div class = "container">
       <div class="jumbotron text-center">
-      <h1>Edit Table</h1>
-      <p class="lead">This stuff is far from from done, but you made it to the edit page.</p>
+        <h1>Edit Table</h1>
       </div>
+    </div>
+
+    <div class="container">
+      <div class="container">
+        <p>Enter an id here to search for it:</p>
+        <div id="search"></div>
+      </div>
+      <div class="container">
+        <p>All possible id's:</p>
+        <p>{{ idS|safe }}</p>
+      </div>
+      <div>
+        <div id="idField"></div>
+        <div id="nameField"></div>
+        <div id="markField"></div>
+        <div class="btn-group" role="group" style="display: flex; align-items: center; margin: 10%;">
+          <button type="button" class="btn btn-success" onclick="addOrUpdateStudent()">Add/Update Student</button>
+          <button type="button" class="btn btn-danger" onclick="deleteStudent()">Delete Student</button>
+        </div>
+      </div>
+      <div id="editor"></div>
     </div>
 
     
@@ -56,5 +76,180 @@
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 
+    <!-- Load React and JSX. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+
+    <!--  Search Script -->
+    <script type="text/babel">
+    var i = {{ index }};
+    var ids = {{ idS|tojson }};
+
+    class SearchForm extends React.Component {
+      constructor(props) {
+        super(props);
+
+        if(i > -1) {
+          this.state = {value: ids[i]}
+        } else {
+          this.state = {value: -1};
+        }
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+      }
+
+      handleChange(event) {
+        this.setState({value: event.target.value});
+      }
+
+      handleSubmit(event) {
+        $.post( "/edit", {
+          stat: 3,
+          id: this.state.value,
+          nm: ' ',
+          mk: 0
+        });
+        event.preventDefault();
+      }
+
+      render() {
+        if (this.state.value == -1) {
+          return (
+            <form onSubmit={this.handleSubmit}>
+              <label>
+                id:
+                <input type="number" value={this.state.value} onChange={this.handleChange} />
+              </label>
+              <input type="submit" value="Submit" />
+            </form>
+          );
+        } else{
+          return (
+            <form onSubmit={this.handleSubmit}>
+              <label>
+                id:
+                <textarea value={this.state.value} onChange={this.handleChange} />
+                <input type="number" value={this.state.value} onChange={this.handleChange} />
+              </label>
+              <input type="submit" value="Submit" />
+            </form>
+          );
+        }
+      }
+    }
+
+    ReactDOM.render(
+        SearchForm().render(),
+        document.getElementById('search')
+      );
+    
+    </script>
+
+<!--  input Field Script -->
+<script type="text/babel">
+  var i = {{ index }};
+  var ids = {{ idS|tojson }};
+  var names = {{ nameS|tojson }};
+  var marks = {{ markS|tojson }};
+
+  class InputForm extends React.Component {
+    constructor(props) {
+      super(props);
+
+      if(i > -1) {
+        this.state = {id: ids[i], name: names[i], mark: marks[i]}
+      } else {
+        this.state = {id: -1, name: '', mark: 0};
+      }
+
+      this.handleChange = this.handleChange.bind(this);
+      this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleChange(event) {
+      const target = event.target;
+      const value = target.value;
+      const name = target.name;
+
+      this.setState({
+        [name]: value
+      });
+    }
+
+    render() {
+      <form>
+        <label>
+          Id:
+          <input
+            name="id"
+            type="number"
+            value={this.state.id}
+            onChange={this.handleInputChange} />
+        </label>
+        <br />
+        <label>
+          Name:
+          <input
+            name="name"
+            type="text"
+            value={this.state.name}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Marks:
+          <input
+            name="mark"
+            type="number"
+            value={this.state.mark}
+            onChange={this.handleInputChange} />
+        </label>
+      </form>
+    }
+  }
+
+  var inputComp = InputForm();
+
+  function addOrUpdateStudent() {
+    var i = 0;
+    while (i < ids.length && ids[i] != inputComp.state.id) {
+      i = i + 1;
+    }
+
+    if (i < ids.length && ids[i] == inputComp.state.id) {
+      $.post( "/edit", {
+        stat: 1,
+        id: inputComp.state.id,
+        nm: inputComp.state.name,
+        mk: inputComp.state.mark
+      });
+    } else {
+      $.post( "/edit", {
+        stat: 0,
+        id: inputComp.state.id,
+        nm: inputComp.state.name,
+        mk: inputComp.state.mark
+      });
+    }
+  }
+
+  function deleteStudent() {
+    $.post( "/edit", {
+      stat: 2,
+      id: inputComp.state.id,
+      nm: inputComp.state.name,
+      mk: inputComp.state.mark
+    });
+  }
+
+  ReactDOM.render(
+      inputComp.render(),
+      document.getElementById('search')
+    );
+  
+  </script>
   </body>
 </html>
